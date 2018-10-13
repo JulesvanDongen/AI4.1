@@ -1,3 +1,5 @@
+import copy
+
 board = [
     [7, 0, 3, 0, 1, 0, 59, 0, 81],
     [0, 0, 0, 33, 34, 57, 0, 0, 0],
@@ -21,55 +23,63 @@ def isFinished(board):
     return True
 
 def getSurroundingPositions(position, board, stepcount):
-    # TODO: implement step count
-
     returnedPositions = []
     if position[0] > 0:
         appendedPosition = [position[0] - 1, position[1]]
-        if board[appendedPosition[0]][appendedPosition[1]] != -1:
+        boardValue = board[appendedPosition[0]][appendedPosition[1]]
+        if boardValue == stepcount:
+            return [appendedPosition]
+        elif boardValue == 0:
             returnedPositions.append(appendedPosition)
     if position[0] < len(board) - 1:
         appendedPosition = [position[0] + 1, position[1]]
-        if board[appendedPosition[0]][appendedPosition[1]] != -1:
+        boardValue = board[appendedPosition[0]][appendedPosition[1]]
+        if boardValue == stepcount:
+            return [appendedPosition]
+        elif boardValue == 0:
             returnedPositions.append(appendedPosition)
     if position[1] > 0:
         appendedPosition = [position[0], position[1] - 1]
-        if board[appendedPosition[0]][appendedPosition[1]] != -1:
+        boardValue = board[appendedPosition[0]][appendedPosition[1]]
+        if boardValue == stepcount:
+            return [appendedPosition]
+        elif boardValue == 0:
             returnedPositions.append(appendedPosition)
     if position[1] < len(board[0]) - 1:
         appendedPosition = [position[0], position[1] + 1]
-        if board[appendedPosition[0]][appendedPosition[1]] != -1:
+        boardValue = board[appendedPosition[0]][appendedPosition[1]]
+        if boardValue == stepcount:
+            return [appendedPosition]
+        elif boardValue == 0:
             returnedPositions.append(appendedPosition)
 
     return returnedPositions
 
 def move(moves, board):
-    # Remove the last position from the board
+    # Put the last move on the board
     lastMove = moves[len(moves)-1]
-    board[lastMove[0]][lastMove[1]] = -1
+    newboard = board.copy()
+    newboard[lastMove[0]][lastMove[1]] = -1
 
-    if isFinished(board):
+    if isFinished(newboard):
         return moves
     else:
         # Find the possible moves, if there are no possible moves left which can be used, return Null
         # print(getSurroundingPositions(lastMove, board))
-        for pos in getSurroundingPositions(lastMove, board, len(moves) + 1):
-            if pos == [8,0]:
-                print(board)
+        possiblePositions = getSurroundingPositions(lastMove, newboard, len(moves) + 1)
 
-            newboard = board
-            newMoves = moves
+        for pos in possiblePositions:
+            newMoves = moves.copy()
             newMoves.append(pos)
-            result = move(newMoves, newboard)
+            result = move(copy.deepcopy(newMoves), copy.deepcopy(newboard))
             if result is not None:
                 return result
+
         return None
     pass
 
 allMoves = move([currentPos], board)
 
 print(allMoves)
-# print(board)
-# print(getSurroundingPositions([1,1], board))
 
 
