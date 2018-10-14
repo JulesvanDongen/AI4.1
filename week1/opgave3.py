@@ -1,5 +1,7 @@
 import copy
 
+# Time complexity for Depth First Search is O(c^n)
+
 board = [
     [7, 0, 3, 0, 1, 0, 59, 0, 81],
     [0, 0, 0, 33, 34, 57, 0, 0, 0],
@@ -78,8 +80,26 @@ def move(moves, board):
         return None
     pass
 
+def printBoard(board):
+    for row in board:
+        str = ""
+        for item in row:
+            str += "{:2} ".format(item)
+        print(str)
+    pass
+
+def playMoves(moves, board):
+    newBoard = copy.deepcopy(board)
+    moveCount = 0
+
+    for move in moves:
+        moveCount += 1
+        print(f"Playing move: {move}, movecount: {moveCount}")
+        newBoard[move[0]][move[1]] = -1
+        printBoard(newBoard)
+
 allMoves = move([currentPos], board)
 
-print(allMoves)
-
+print(f"The moves needed to complete the board: {allMoves}")
+playMoves(allMoves, board)
 
