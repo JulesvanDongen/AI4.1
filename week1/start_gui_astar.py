@@ -1,6 +1,8 @@
 import tkinter as tk
 from tkinter import ttk
 
+from week1.UCS import UCS
+
 import random
 import heapq
 
@@ -11,6 +13,7 @@ import heapq
 #    root.update()
 
 # global color scheme
+
 bgc = '#FDF6E3'
 gridc = '#542437'
 blockc = 'red'
@@ -109,6 +112,9 @@ def control_panel():
             init()
         START_FLAG = False
         # start searching
+        print(f"Calculating: {bt_alg.get()}")
+        ucs = UCS()
+        ucs.iterate()
 
     start_button = tk.Button(mf, text="Start", command=start_search, width=10)
     start_button.grid(row=1, column=1, sticky='w', padx=5, pady=5)
