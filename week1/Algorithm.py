@@ -1,13 +1,18 @@
 from abc import ABC, abstractmethod
 
-
 class Algorithm(ABC):
-    pauseLambda = lambda: None
+
+    pauseMethod = lambda: None
 
     @abstractmethod
     def nextIteration(self):
         pass
 
+    @abstractmethod
+    def hasNextIteration(self):
+        pass
+
     def iterate(self):
-        while self.nextIteration():
-            self.pauseLambda
+        while self.hasNextIteration():
+            self.nextIteration()
+            self.pauseMethod()

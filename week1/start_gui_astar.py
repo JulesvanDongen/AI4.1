@@ -1,7 +1,8 @@
 import tkinter as tk
 from tkinter import ttk
 
-from week1.UCS import UCS
+from week1.Algorithm import Algorithm
+# from week1.UCS import UCS
 
 import random
 import heapq
@@ -13,6 +14,7 @@ import heapq
 #    root.update()
 
 # global color scheme
+from week1.UCS import UCS
 
 bgc = '#FDF6E3'
 gridc = '#542437'
@@ -34,6 +36,15 @@ CELL  = 35 # size of cell/square in pixels
 W  = (SIZE-1) * CELL # width of grid in pixels
 H  = W # height of grid
 TR = 10 # translate/move the grid, upper left is 10,10
+
+def getAlgorithm(algorithmName):
+    # The list of algorithms implemented
+    algorithms = {
+        UCS.NAME: globals()["UCS"]
+    }
+
+    algorithmClass = algorithms[algorithmName]
+    return algorithmClass()
 
 class PriorityQueue:
     # to be use in the A* algorithm
@@ -113,8 +124,9 @@ def control_panel():
         START_FLAG = False
         # start searching
         print(f"Calculating: {bt_alg.get()}")
-        ucs = UCS()
-        ucs.iterate()
+        algorithm = getAlgorithm(bt_alg.get())
+        algorithm.pauseMethod = lambda: root.after(50)
+        algorithm.iterate()
 
     start_button = tk.Button(mf, text="Start", command=start_search, width=10)
     start_button.grid(row=1, column=1, sticky='w', padx=5, pady=5)
@@ -122,9 +134,9 @@ def control_panel():
     def select_alg():
         print('algorithm =', bt_alg.get())
 
-    r1_button = tk.Radiobutton(mf, text='UC', value='UC', variable=bt_alg, command=select_alg)
+    r1_button = tk.Radiobutton(mf, text=UCS.NAME, value=UCS.NAME, variable=bt_alg, command=select_alg)
     r2_button = tk.Radiobutton(mf, text='A*', value='A*', variable=bt_alg, command=select_alg)
-    bt_alg.set('UC')
+    bt_alg.set(UCS.NAME)
 
     r1_button.grid(row=3, column=1, columnspan=2, sticky='w')
     r2_button.grid(row=4, column=1, columnspan=2, sticky='w')

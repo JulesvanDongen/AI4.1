@@ -2,7 +2,8 @@ from week1.Algorithm import Algorithm
 
 
 class UCS(Algorithm):
-    count = 0;
+    NAME = "UC"
+    count = 0
 
     def nextIteration(self):
         print(f"Iteration: {self.count}")
@@ -12,3 +13,6 @@ class UCS(Algorithm):
         else:
             self.count = 0
             return False
+
+    def hasNextIteration(self):
+        return self.count != 100
