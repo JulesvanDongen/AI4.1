@@ -2,7 +2,7 @@ from week1.Algorithm import Algorithm
 
 
 class UCS(Algorithm):
-    NAME = "UC"
+    NAME = "UCS"
     count = 0
 
     def nextIteration(self):

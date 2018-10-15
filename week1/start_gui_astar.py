@@ -125,7 +125,8 @@ def control_panel():
         # start searching
         print(f"Calculating: {bt_alg.get()}")
         algorithm = getAlgorithm(bt_alg.get())
-        algorithm.pauseMethod = lambda: root.after(50)
+        delay = int(box1.get()) * 20
+        algorithm.pauseMethod = lambda: root.after(delay)
         algorithm.iterate()
 
     start_button = tk.Button(mf, text="Start", command=start_search, width=10)
