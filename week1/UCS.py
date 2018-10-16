@@ -1,3 +1,4 @@
+import math
 from collections import deque
 
 from week1.Algorithm import Algorithm
@@ -24,12 +25,11 @@ class UCS(Algorithm):
         if nextPos == (len(self.grid) -1, len(self.grid[0]) -1):
             # This is the solution, remove everything from the unvisited queue and draw the path
             self.unvisited = deque()
-            
+
             lastPos = nextPos
             weight, previousPos = self.visited[nextPos]
 
             while previousPos != None:
-                # print(previousPos)
                 self.markFinalRoute(lastPos, previousPos)
                 lastPos = previousPos
                 weight, previousPos = self.visited[previousPos]
@@ -39,7 +39,6 @@ class UCS(Algorithm):
             x,y = nextPos
             self.internalGrid[x][y] = 0
             self.appendSurroundingPositions(nextPos)
-            self.findPassedPosWithLowestWeight(nextPos)
 
 
     def hasNextIteration(self):
@@ -57,12 +56,12 @@ class UCS(Algorithm):
                 self.unvisited.appendleft(pos)
 
     def findPassedPosWithLowestWeight(self, position):
-        weight = -1
+        weight = math.inf
         lowestWeightPosition = None
         for passedPosition in self.getSurroundingPassedPositions(position):
             weightBefore, posBefore = self.visited[passedPosition]
 
-            if weightBefore > weight:
+            if weightBefore < weight:
                 lowestWeightPosition = passedPosition
                 weight = weightBefore
 

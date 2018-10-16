@@ -5,7 +5,6 @@ from week1.Algorithm import Algorithm
 # from week1.UCS import UCS
 
 import random
-import heapq
 
 #assuming a resulution of 1920 x 1080 = 16 : 9
 
@@ -45,7 +44,8 @@ algorithm = None
 def getAlgorithm(algorithmName):
     # The list of algorithms implemented
     algorithms = {
-        UCS.NAME: globals()["UCS"]
+        UCS.NAME: globals()["UCS"],
+        Astar.NAME: globals()["Astar"]
     }
 
     algorithmClass = algorithms[algorithmName]
@@ -62,27 +62,6 @@ def markFinalRoute(fromPos, toPos):
     tox, toy = toPos
     plot_line_segment(canvas, fromx, fromy, tox, toy, pathc)
     canvas.update()
-
-class PriorityQueue:
-    # to be use in the A* algorithm
-    # a wrapper around heapq (aka priority queue), a binary min-heap on top of a list
-    # in a min-heap, the keys of parent nodes are less than or equal to those
-    # of the children and the lowest key is in the root node
-    def __init__(self):
-        # create a min heap (as a list)
-        self.elements = []
-    
-    def empty(self):
-        return len(self.elements) == 0
-    
-    # heap elements are tuples (priority, item)
-    def put(self, item, priority):
-        heapq.heappush(self.elements, (priority, item))
-    
-    # pop returns the smallest item from the heap
-    # i.e. the root element = element (priority, item) with highest priority
-    def get(self):
-        return heapq.heappop(self.elements)[1]
 
 def bernoulli_trial():
     return 1 if random.random() < int(prob.get())/10 else 0
