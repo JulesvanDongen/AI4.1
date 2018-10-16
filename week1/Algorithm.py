@@ -5,6 +5,7 @@ class Algorithm(ABC):
 
     pauseMethod = lambda: None
     markCheckingPosition = lambda posFrom, posTo: None
+    markFinalRoute = lambda posFrom, posTo: None
     grid = None
     internalGrid = None
 
@@ -56,3 +57,13 @@ class Algorithm(ABC):
 
         return result
 
+    def getSurroundingPassedPositions(self, position):
+        possiblePositions = self.getSurroundingPositions(position)
+
+        result = []
+        for pos in possiblePositions:
+            x,y = pos
+            if self.internalGrid[x][y] == 0:
+                result.append(pos)
+
+        return result

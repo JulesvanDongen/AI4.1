@@ -57,6 +57,12 @@ def markCheckingPosition(fromPos, toPos):
     plot_line_segment(canvas, fromx, fromy, tox, toy, attemptedc)
     canvas.update()
 
+def markFinalRoute(fromPos, toPos):
+    fromx, fromy = fromPos
+    tox, toy = toPos
+    plot_line_segment(canvas, fromx, fromy, tox, toy, pathc)
+    canvas.update()
+
 class PriorityQueue:
     # to be use in the A* algorithm
     # a wrapper around heapq (aka priority queue), a binary min-heap on top of a list
@@ -134,24 +140,25 @@ def control_panel():
             init()
         START_FLAG = False
         # start searching
-        try:
-            def pause():
-                root.after(int(box1.get()) * 20)
-                root.update()
+        # try:
+        def pause():
+            root.after(int(box1.get()) * 20)
+            root.update()
 
-            global algorithm
+        global algorithm
 
-            if algorithm != None:
-                algorithm.stop()
-                root.after(50)
+        if algorithm != None:
+            algorithm.stop()
+            root.after(50)
 
-            algorithm = getAlgorithm(bt_alg.get())
-            algorithm.pauseMethod = pause
-            algorithm.markCheckingPosition = markCheckingPosition
-            algorithm.grid = grid
-            algorithm.iterate()
-        except KeyError:
-            print(f"Could not find the {bt_alg.get()} algorithm.")
+        algorithm = getAlgorithm(bt_alg.get())
+        algorithm.pauseMethod = pause
+        algorithm.markCheckingPosition = markCheckingPosition
+        algorithm.markFinalRoute = markFinalRoute
+        algorithm.grid = grid
+        algorithm.iterate()
+        # except KeyError:
+        #     print(f"Could not find the {bt_alg.get()} algorithm.")
 
     start_button = tk.Button(mf, text="Start", command=start_search, width=10)
     start_button.grid(row=1, column=1, sticky='w', padx=5, pady=5)

@@ -7,10 +7,12 @@ class UCS(Algorithm):
     NAME = "UCS"
 
     unvisited = deque()
+    visited = {}
 
     def nextIteration(self):
-        # 1. Take an unvisited node
+        # 1. Take an unvisited node, find the fastest route on one of the surrounding positions and add this as a route
         nextPos = self.unvisited.pop()
+        self.visited[nextPos] = self.findPassedPosWithLowestWeight(nextPos)
         # print(f"Next position: {nextPos}")
         # print(f"Unvisited positions: {self.unvisited}")
 
@@ -23,15 +25,24 @@ class UCS(Algorithm):
         # 3a. Check if that is the solution
         if nextPos == (len(self.grid) -1, len(self.grid[0]) -1):
             # This is the solution, remove everything from the unvisited queue and draw the path
-            print(self.unvisited)
             self.unvisited = deque()
             print("Found final position")
+            lastPos = nextPos
+            weight, previousPos = self.visited[nextPos]
+            print(previousPos)
+            while previousPos != None:
+                # print(previousPos)
+                self.markFinalRoute(lastPos, previousPos)
+                lastPos = previousPos
+                weight, previousPos = self.visited[previousPos]
 
         # 3b. Else, find the surrounding positions, add them to the surrounding nodes and mark the current spot as visited
         else:
             x,y = nextPos
             self.internalGrid[x][y] = 0
             self.appendSurroundingPositions(nextPos)
+            self.findPassedPosWithLowestWeight(nextPos)
+
 
     def hasNextIteration(self):
         return len(self.unvisited) > 0 and self.shouldStop == False
@@ -39,9 +50,22 @@ class UCS(Algorithm):
     def initialize(self):
         super().initialize()
         self.unvisited = deque()
+        self.visited = {(0,0): (0, None)}
         self.appendSurroundingPositions((0,0))
 
     def appendSurroundingPositions(self, position):
         for pos in self.getSurroundingPossiblePositions(position):
             if pos not in self.unvisited:
                 self.unvisited.appendleft(pos)
+
+    def findPassedPosWithLowestWeight(self, position):
+        weight = -1
+        lowestWeightPosition = None
+        for passedPosition in self.getSurroundingPassedPositions(position):
+            weightBefore, posBefore = self.visited[passedPosition]
+
+            if weightBefore > weight:
+                lowestWeightPosition = passedPosition
+                weight = weightBefore
+
+        return (weight + 1, lowestWeightPosition)
