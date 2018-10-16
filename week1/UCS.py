@@ -13,8 +13,6 @@ class UCS(Algorithm):
         # 1. Take an unvisited node, find the fastest route on one of the surrounding positions and add this as a route
         nextPos = self.unvisited.pop()
         self.visited[nextPos] = self.findPassedPosWithLowestWeight(nextPos)
-        # print(f"Next position: {nextPos}")
-        # print(f"Unvisited positions: {self.unvisited}")
 
         # 2. Draw the line from the previous position to the next position
         for pos in self.getSurroundingPositions(nextPos):
@@ -26,10 +24,10 @@ class UCS(Algorithm):
         if nextPos == (len(self.grid) -1, len(self.grid[0]) -1):
             # This is the solution, remove everything from the unvisited queue and draw the path
             self.unvisited = deque()
-            print("Found final position")
+            
             lastPos = nextPos
             weight, previousPos = self.visited[nextPos]
-            print(previousPos)
+
             while previousPos != None:
                 # print(previousPos)
                 self.markFinalRoute(lastPos, previousPos)
