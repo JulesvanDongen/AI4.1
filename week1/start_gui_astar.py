@@ -14,6 +14,7 @@ import heapq
 #    root.update()
 
 # global color scheme
+from week1.Astar import Astar
 from week1.UCS import UCS
 
 bgc = '#FDF6E3'
@@ -22,6 +23,7 @@ blockc = 'red'
 pathc = 'blue'
 startc = '#C7F464'
 goalc = 'yellow'
+attemptedc = 'red'
 
 # global vars: grid
 SIZE  = 25 # the nr of nodes=grid crossings in a row (or column)
@@ -37,6 +39,9 @@ W  = (SIZE-1) * CELL # width of grid in pixels
 H  = W # height of grid
 TR = 10 # translate/move the grid, upper left is 10,10
 
+# The algorithm which might be running
+algorithm = None
+
 def getAlgorithm(algorithmName):
     # The list of algorithms implemented
     algorithms = {
@@ -45,6 +50,12 @@ def getAlgorithm(algorithmName):
 
     algorithmClass = algorithms[algorithmName]
     return algorithmClass()
+
+def markCheckingPosition(fromPos, toPos):
+    fromx, fromy = fromPos
+    tox, toy = toPos
+    plot_line_segment(canvas, fromx, fromy, tox, toy, attemptedc)
+    canvas.update()
 
 class PriorityQueue:
     # to be use in the A* algorithm
@@ -123,11 +134,24 @@ def control_panel():
             init()
         START_FLAG = False
         # start searching
-        print(f"Calculating: {bt_alg.get()}")
-        algorithm = getAlgorithm(bt_alg.get())
-        delay = int(box1.get()) * 20
-        algorithm.pauseMethod = lambda: root.after(delay)
-        algorithm.iterate()
+        try:
+            def pause():
+                root.after(int(box1.get()) * 20)
+                root.update()
+
+            global algorithm
+
+            if algorithm != None:
+                algorithm.stop()
+                root.after(50)
+
+            algorithm = getAlgorithm(bt_alg.get())
+            algorithm.pauseMethod = pause
+            algorithm.markCheckingPosition = markCheckingPosition
+            algorithm.grid = grid
+            algorithm.iterate()
+        except KeyError:
+            print(f"Could not find the {bt_alg.get()} algorithm.")
 
     start_button = tk.Button(mf, text="Start", command=start_search, width=10)
     start_button.grid(row=1, column=1, sticky='w', padx=5, pady=5)
@@ -136,7 +160,7 @@ def control_panel():
         print('algorithm =', bt_alg.get())
 
     r1_button = tk.Radiobutton(mf, text=UCS.NAME, value=UCS.NAME, variable=bt_alg, command=select_alg)
-    r2_button = tk.Radiobutton(mf, text='A*', value='A*', variable=bt_alg, command=select_alg)
+    r2_button = tk.Radiobutton(mf, text=Astar.NAME, value=Astar.NAME, variable=bt_alg, command=select_alg)
     bt_alg.set(UCS.NAME)
 
     r1_button.grid(row=3, column=1, columnspan=2, sticky='w')
@@ -173,9 +197,9 @@ def init():
     plot_node(canvas, start, color=startc)
     plot_node(canvas, goal, color=goalc)
     # plot a sample path for demonstration
-    for i in range(SIZE-1):
-        plot_line_segment(canvas, i, i, i, i+1, color=pathc)
-        plot_line_segment(canvas, i, i+1, i+1, i+1, color=pathc)
+    # for i in range(SIZE-1):
+    #     plot_line_segment(canvas, i, i, i, i+1, color=pathc)
+    #     plot_line_segment(canvas, i, i+1, i+1, i+1, color=pathc)
 
 
 # create and start GUI
