@@ -88,7 +88,7 @@ def is_point_on_line(point, segment):
     return abs(r) < 0.000001
 
 def cross_product(point_a, point_b):
-    return point_a[0] * point_b[1] - point_b[0] * point_a[0]
+    return point_a[0] * point_b[1] - point_b[0] * point_a[1]
 
 def is_point_right_of_line(line, point):
     a = ((0,0), (line[1][0] - line[0][0], line[1][1] - line[0][1]))
@@ -99,19 +99,15 @@ def is_point_right_of_line(line, point):
 def lines_intersect(line_a, line_b):
     a1, a2 = findBoundingBox(line_a)
     b1, b2 = findBoundingBox(line_b)
-    # print(line_a)
-    # print(line_b)
-    # print(a1, b2)
 
     # 1, check if bounding boxes intersect
-    l1 = a1[0] <= b2[0]
-    l2 = a2[0] >= b1[0]
-    l3 = a1[1] <= b2[1]
-    l4 = a2[1] >= b1[1]
+    l1 = a1[0] < b2[0]
+    l2 = a2[0] > b1[0]
+    l3 = a1[1] < b2[1]
+    l4 = a2[1] > b1[1]
     bounding_boxes_intersect = l1 and l2 and l3 and l4
 
-    if not bounding_boxes_intersect:
-        return False
+    if not bounding_boxes_intersect: return False
 
     # 2, does line a intersect segment b
     if not line_intersects_segment(line_a, line_b): return False
@@ -119,21 +115,64 @@ def lines_intersect(line_a, line_b):
     # 3, does line b intersect segment a
     return line_intersects_segment(line_b, line_a)
 
+def find_crossing(route, last_crossing=None):
+    for i in range(len(route)):
+        if i == len(route) - 1:
+            d = 0
+        else:
+            d = i+1
+        line_a = ((route[i].x, route[i].y), (route[d].x, route[d].y))
+        for j in range(len(route)):
+            if j == len(route) - 1:
+                k = 0
+            else:
+                k = j+1
+            line_b = ((route[j].x, route[j].y), (route[k].x, route[k].y))
+            if i != j and i != j+1 and j != i+1 and (i != len(route) -1 and j != 0) and (i != 0 -1 and j != len(route)) and lines_intersect(line_a, line_b):
+                print(f"Fix crossing {i}, {j}, Lines: {line_a}, {line_b}")
+                # Todo: fix this method
+                new_crossing = (i, j)
+                if last_crossing == new_crossing:
+                    draw_lines((route[i], route[d]), (route[j], route[k]))
+                return new_crossing
+
+    return None
+
+def swap_edges(crossing, route):
+    if crossing[0] == len(route) -1:
+        i = 0
+    else:
+        i = crossing[0] + 1
+
+    j = crossing[1]
+
+    var = route[i]
+    route[i] = route[j]
+    route[j] = var
+
 def line_intersects_segment(line, segment):
     return is_point_on_line(segment[0], line) or is_point_on_line(segment[1], line) or (is_point_right_of_line(line, segment[0]) ^ is_point_right_of_line(line, segment[1]))
 
 def two_opt(cities):
     route = nearest_neighbours(cities)
 
-    a = route.pop()
-    b = route.pop()
-    c = route.pop()
-    d = route.pop()
-    if lines_intersect((a,b), (b,c)):
-        print("The lines intersect")
+    crossing = find_crossing(route)
+    while (crossing != None):
+        i,j = crossing
+        swap_edges(crossing, route)
+        crossing = find_crossing(route, crossing)
 
     return route
 
+# for debugging purposes only
+def draw_lines(line_a, line_b):
+    points = list(line_a) + [line_a[0]]
+    points2 = list(line_b) + [line_b[0]]
+    plt.plot([p.x for p in points], [p.y for p in points], 'bo-')
+    plt.plot([p.x for p in points2], [p.y for p in points2], 'bo-')
+    plt.axis('scaled') # equal increments of x and y have the same length
+    plt.axis('off')
+    plt.show()
 
 cities = make_cities(500)
 
