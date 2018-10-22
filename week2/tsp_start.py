@@ -74,7 +74,76 @@ def nearest_neighbours(cities):
 
     return result
 
+def findBoundingBox(line):
+    a, b = line
+    xa, ya = a
+    xb, yb = b
 
-cities = make_cities(10)
+    return ((min(xa, xb), min(ya, yb)), (max(xa, xb), max(ya, yb)))
+
+def is_point_on_line(point, segment):
+    a = ((0,0), (segment[1][0] - segment[0][0], segment[1][1] - segment[0][1]))
+    b = (point[0] - segment[0][0], point[1] - segment[0][1])
+    r = cross_product(a[1], b)
+    return abs(r) < 0.000001
+
+def cross_product(point_a, point_b):
+    return point_a[0] * point_b[1] - point_b[0] * point_a[0]
+
+def is_point_right_of_line(line, point):
+    a = ((0,0), (line[1][0] - line[0][0], line[1][1] - line[0][1]))
+    b = (point[0] - line[0][0], point[1] - line[0][1])
+    return cross_product(a[1], b) < 0
+
+
+def lines_intersect(line_a, line_b):
+    a1, a2 = findBoundingBox(line_a)
+    b1, b2 = findBoundingBox(line_b)
+    # print(line_a)
+    # print(line_b)
+    # print(a1, b2)
+
+    # 1, check if bounding boxes intersect
+    l1 = a1[0] <= b2[0]
+    l2 = a2[0] >= b1[0]
+    l3 = a1[1] <= b2[1]
+    l4 = a2[1] >= b1[1]
+    bounding_boxes_intersect = l1 and l2 and l3 and l4
+
+    if not bounding_boxes_intersect:
+        return False
+
+    # 2, does line a intersect segment b
+    if not line_intersects_segment(line_a, line_b): return False
+
+    # 3, does line b intersect segment a
+    return line_intersects_segment(line_b, line_a)
+
+def line_intersects_segment(line, segment):
+    return is_point_on_line(segment[0], line) or is_point_on_line(segment[1], line) or (is_point_right_of_line(line, segment[0]) ^ is_point_right_of_line(line, segment[1]))
+
+def two_opt(cities):
+    route = nearest_neighbours(cities)
+
+    a = route.pop()
+    b = route.pop()
+    c = route.pop()
+    d = route.pop()
+    if lines_intersect((a,b), (b,c)):
+        print("The lines intersect")
+
+    return route
+
+
+cities = make_cities(500)
+
 plot_tsp(nearest_neighbours, cities)
-plot_tsp(try_all_tours, cities)
+plot_tsp(two_opt, cities)
+# plot_tsp(try_all_tours, cities)
+
+## C.
+## Als er een kruising is dan is de lengte van de kruising maximaal. Hierom hoeft er niet gecontroleerd te worden of
+## de nieuwe route korter wordt
+
+## E.
+## O(n^3)
