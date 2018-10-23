@@ -163,6 +163,30 @@ def any_legal_move(player, board):
 # - Apply it to the board.
 # - Switch players. If the game is over, get the final score.
 
+def make_testboard():
+    board = initial_board()
+
+    current_player = WHITE
+
+    i = 0
+    while current_player != None and i != 40:
+        # Get move from current player
+        move = random_strategy(current_player, board)
+
+        # Apply it to the board
+        if is_valid(move) and is_legal(move, current_player, board):
+            make_move(move, current_player, board)
+        else:
+            raise IllegalMoveError(current_player, move, board)
+
+        current_player = next_player(board, current_player)
+        i += 1
+
+    # print(print_board(board))
+
+    return (current_player, board)
+
+
 def play(black_strategy, white_strategy):
     # play a game of Othello and return the final board and score
     strategies = {
@@ -170,8 +194,9 @@ def play(black_strategy, white_strategy):
         WHITE: white_strategy
     }
 
-    board = initial_board()
-    current_player = WHITE
+    # current_player, board = '@', ['?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '.', 'o', 'o', 'o', 'o', '.', '.', '.', '?', '?', 'o', 'o', 'o', '@', 'o', '.', '.', '.', '?', '?', 'o', 'o', '@', '@', 'o', 'o', '.', 'o', '?', '?', 'o', '@', '@', '@', '@', 'o', 'o', 'o', '?', '?', '@', '@', '@', '@', '@', 'o', 'o', 'o', '?', '?', '@', 'o', '@', 'o', '@', '@', 'o', 'o', '?', '?', '@', 'o', 'o', '@', '@', 'o', 'o', 'o', '?', '?', '@', 'o', 'o', '.', '@', 'o', 'o', '@', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?'] # use this for testing
+    current_player, board = make_testboard()
+    # current_player, board = WHITE, initial_board()
 
     while current_player != None:
         # Get move from current player
@@ -183,6 +208,7 @@ def play(black_strategy, white_strategy):
         else:
             raise IllegalMoveError(current_player, move, board)
 
+        print(f"{current_player} made a move for {move}")
         print(print_board(board))
         current_player = next_player(board, current_player)
 
@@ -228,28 +254,31 @@ def negamax_strategy(player, board):
 
     def nega(player, factor, board):
         new_board = copy.deepcopy(board)
+        new_factor = factor
 
         best_move_value = -len(board)
-        for move in legal_moves(player, new_board):
+        best_move = None
+
+        moves = legal_moves(player, new_board)
+        for move in moves:
             make_move(move, player, new_board)
-            new_player = next_player(board, player)
+            new_player = next_player(new_board, player)
+
+            if new_player == None:
+                return score(player, board) * factor, move
 
             if new_player != player:
-                factor *= -1
+                new_factor *= -1
 
-            possible_value = nega(new_player, factor, new_board)
+            possible_value, subsequent_move = nega(new_player, new_factor, new_board)
+
             if possible_value > best_move_value:
                 best_move_value = possible_value
+                best_move = move
 
-        return best_move_value * factor
+        return best_move_value * new_factor, best_move
 
-    best_move_value = -len(board)
-    best_move = None
-    moves = legal_moves(player, board)
-
-    for move in moves:
-        if nega(player, 1, board) > best_move_value:
-            best_move = move
+    val, best_move = nega(player, 1, board)
 
     return best_move
 
@@ -257,30 +286,33 @@ def negamax_alpha_beta_strategy(player, board):
 
     def nega(player, factor, board):
         new_board = copy.deepcopy(board)
+        new_factor = factor
 
         best_move_value = -len(board)
-        for move in legal_moves(player, new_board):
+        best_move = None
+
+        moves = legal_moves(player, new_board)
+        for move in moves:
             make_move(move, player, new_board)
-            new_player = next_player(board, player)
+            new_player = next_player(new_board, player)
+
+            if new_player == None:
+                return score(player, board) * factor, move
 
             if new_player != player:
-                factor *= -1
+                new_factor *= -1
 
-            possible_value = nega(new_player, factor, new_board)
+            possible_value, subsequent_move = nega(new_player, new_factor, new_board)
+
             if possible_value > best_move_value:
                 best_move_value = possible_value
+                best_move = move
             else:
                 break
 
-        return best_move_value * factor
+        return best_move_value * new_factor, best_move
 
-    best_move_value = -len(board)
-    best_move = None
-    moves = legal_moves(player, board)
-
-    for move in moves:
-        if nega(player, 1, board) > best_move_value:
-            best_move = move
+    val, best_move = nega(player, 1, board)
 
     return best_move
 
