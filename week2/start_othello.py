@@ -1,3 +1,4 @@
+import copy
 import random
 
 """
@@ -224,11 +225,67 @@ def score(player, board):
 # Play strategies
 
 def negamax_strategy(player, board):
-    print("Negamax not yet implemented")
-    return None
+
+    def nega(player, factor, board):
+        new_board = copy.deepcopy(board)
+
+        best_move_value = -len(board)
+        for move in legal_moves(player, new_board):
+            make_move(move, player, new_board)
+            new_player = next_player(board, player)
+
+            if new_player != player:
+                factor *= -1
+
+            possible_value = nega(new_player, factor, new_board)
+            if possible_value > best_move_value:
+                best_move_value = possible_value
+
+        return best_move_value * factor
+
+    best_move_value = -len(board)
+    best_move = None
+    moves = legal_moves(player, board)
+
+    for move in moves:
+        if nega(player, 1, board) > best_move_value:
+            best_move = move
+
+    return best_move
+
+def negamax_alpha_beta_strategy(player, board):
+
+    def nega(player, factor, board):
+        new_board = copy.deepcopy(board)
+
+        best_move_value = -len(board)
+        for move in legal_moves(player, new_board):
+            make_move(move, player, new_board)
+            new_player = next_player(board, player)
+
+            if new_player != player:
+                factor *= -1
+
+            possible_value = nega(new_player, factor, new_board)
+            if possible_value > best_move_value:
+                best_move_value = possible_value
+            else:
+                break
+
+        return best_move_value * factor
+
+    best_move_value = -len(board)
+    best_move = None
+    moves = legal_moves(player, board)
+
+    for move in moves:
+        if nega(player, 1, board) > best_move_value:
+            best_move = move
+
+    return best_move
 
 def random_strategy(player, board):
-    move = legal_moves(player, board)
-    return move[random.randint(0,len(move) - 1)]
+    move = random.choice(legal_moves(player, board))
+    return move
 
-play(random_strategy, random_strategy)
+play(negamax_alpha_beta_strategy, random_strategy)
