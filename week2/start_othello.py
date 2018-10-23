@@ -1,3 +1,5 @@
+import random
+
 """
 
 Othello is a turn-based two-player strategy board game.
@@ -162,15 +164,71 @@ def any_legal_move(player, board):
 
 def play(black_strategy, white_strategy):
     # play a game of Othello and return the final board and score
+    strategies = {
+        BLACK: black_strategy,
+        WHITE: white_strategy
+    }
+
+    board = initial_board()
+    current_player = WHITE
+
+    while current_player != None:
+        # Get move from current player
+        move = strategies[current_player](current_player, board)
+
+        # Apply it to the board
+        if is_valid(move) and is_legal(move, current_player, board):
+            make_move(move, current_player, board)
+        else:
+            raise IllegalMoveError(current_player, move, board)
+
+        print(print_board(board))
+        current_player = next_player(board, current_player)
+
+    # Get the final score of the game
+    score_white = score(WHITE, board)
+    score_black = score(BLACK, board)
+
+    print(f"Game finished. White: {score_white} - Black: {score_black}")
 
 def next_player(board, prev_player):
     # which player should move next?  Returns None if no legal moves exist
+    if prev_player == BLACK:
+        next_player = WHITE
+    else:
+        next_player = BLACK
+
+    if len(legal_moves(next_player, board)) == 0:
+        if len(legal_moves(prev_player, board)) == 0:
+            return None
+        else:
+            return prev_player
+    else:
+        return next_player
 
 def get_move(strategy, player, board):
     # call strategy(player, board) to get a move
+    return strategy(player, board)
 
 def score(player, board):
     # compute player's score (number of player's pieces minus opponent's)
+    score = 0
+    for p in board:
+        if p == player:
+            score += 1
+        elif p != '?':
+            score -= 1
+    return score
+
 
 # Play strategies
 
+def negamax_strategy(player, board):
+    print("Negamax not yet implemented")
+    return None
+
+def random_strategy(player, board):
+    move = legal_moves(player, board)
+    return move[random.randint(0,len(move) - 1)]
+
+play(random_strategy, random_strategy)
