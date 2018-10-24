@@ -88,28 +88,29 @@ def grid_complete(grid):
 
     return True
 
-# Todo: Implement backtracking
 def solve(grid):
     # backtracking search a solution (DFS)
     # your code here
     def search(grid):
         result = None
-        for position in grid:
-            if len(grid[position]) > 1:
-                for option in enumerate(grid[position]):
-                    if no_conflict(grid, position, option[1]):
-                        previous_value = grid[position]
-                        grid[position] = option[1]
+        sorted_grid = list(filter(lambda e: len(e[1]) > 1, sorted(grid.items(), key=lambda e: len(e[1]))))
 
-                        if grid_complete(grid): return grid
+        for position, value in sorted_grid:
+            for option in list(grid[position]):
+                if no_conflict(grid, position, option): # If the move is possible, do it
+                    new_grid = copy.deepcopy(grid)
+                    new_grid[position] = option
 
-                        result = search(grid)
+                    # Remove the move from the peers
+                    for peer in peers[position]:
+                        new_grid[peer] = new_grid[peer].replace(option, "")
 
-                        if result != None:
-                            return result
-                        else:
-                            # Put the previous value back
-                            grid[position] = previous_value
+                    if grid_complete(new_grid): return new_grid
+
+                    result = search(new_grid)
+
+                    if result != None:
+                        return result
 
         return result
 
