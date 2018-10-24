@@ -117,30 +117,6 @@ def lines_intersect(line_a, line_b):
     # 3, does line b intersect segment a
     return line_intersects_segment(line_b, line_a)
 
-def find_crossing(route):
-    for i in range(len(route)):
-        if i == len(route) - 1:
-            d = 0
-        else:
-            d = i+1
-        line_a = ((route[i].x, route[i].y), (route[d].x, route[d].y))
-        for j in range(len(route)):
-            if j == len(route) - 1:
-                k = 0
-            else:
-                k = j+1
-            line_b = ((route[j].x, route[j].y), (route[k].x, route[k].y))
-            if i != j and i != j+1 and j != i+1 and (i != len(route) -1 and j != 0) and (i != 0 and j != len(route) -1) and lines_intersect(line_a, line_b):
-                print(f"Fix crossing {i}, {j}, Lines: {line_a}, {line_b}")
-                # Todo: fix this method
-                new_crossing = (i, j)
-                # if last_crossing == new_crossing:
-
-                # draw_lines((route[i], route[d]), (route[j], route[k]), route)
-                return new_crossing
-
-    return None
-
 def swap_edges(crossing, route):
     i, j = crossing
 
@@ -151,51 +127,45 @@ def swap_edges(crossing, route):
         last = j + 1
         first = i
 
+    new_route = copy.deepcopy(route)
     slice = route[first:last]
     slice.reverse()
 
-    route[first:last] = slice
+    new_route[first:last] = slice
+    return new_route
 
 def line_intersects_segment(line, segment):
     return is_point_on_line(segment[0], line) or is_point_on_line(segment[1], line) or (is_point_right_of_line(line, segment[0]) ^ is_point_right_of_line(line, segment[1]))
 
 
-def find_swap_for_crossing(crossing, route):
-    test_route = copy.deepcopy(route)
-    crossing_options = itertools.permutations([crossing[0], crossing[1], crossing[0] + 1, crossing[1] + 1], 2)
-    best_swap = crossing
-    swap_edges(best_swap, test_route)
-    best_swap_value = tour_length(test_route)
-    swap_edges(best_swap, test_route)
+def find_swap(route):
+    i = 0
+    while i < len(route) - 1:
+        j = i + 2
 
-    for swap_option in crossing_options:
+        while j < len(route) - 1:
 
-        swap_edges(swap_option, test_route)
+            # print(i, j, len(route) - 1)
+            new_route = swap_edges((i, j), route)
 
-        length = tour_length(test_route)
-        if length < best_swap_value:
-            best_swap = swap_option
-            best_swap_value = length
-            print(length)
-        else:
-            # Swap the edges back
-            swap_edges(swap_option, test_route)
+            if tour_length(new_route) < tour_length(route):
+                print(f"New route of length {tour_length(new_route)}")
+                # plot_tour(new_route)
+                return new_route
 
-    return best_swap
+            j += 1
 
+        i += 1
 
 def two_opt(cities):
     route = nearest_neighbours(cities)
+    new_route = find_swap(route)
 
-    crossing = find_crossing(route)
-    while (crossing != None):
-        swap = find_swap_for_crossing(crossing, route)
+    while new_route != None:
+        if tour_length(route) > tour_length(new_route):
+            route = new_route
 
-        if swap != None:
-            swap_edges(swap, route)
-        # swap_edges(crossing, route)
-        # plot_tour(route)
-        crossing = find_crossing(route)
+        new_route = find_swap(route)
 
     return route
 
