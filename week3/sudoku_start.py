@@ -98,15 +98,18 @@ def solve(grid):
             if len(grid[position]) > 1:
                 for option in enumerate(grid[position]):
                     if no_conflict(grid, position, option[1]):
-                        new_grid = copy.deepcopy(grid)
-                        new_grid[position] = option[1]
-                        # display(new_grid)
+                        previous_value = grid[position]
+                        grid[position] = option[1]
 
-                        if grid_complete(new_grid): return new_grid
+                        if grid_complete(grid): return grid
 
-                        result = search(new_grid)
+                        result = search(grid)
 
-                        if result != None: return result
+                        if result != None:
+                            return result
+                        else:
+                            # Put the previous value back
+                            grid[position] = previous_value
 
         return result
 
@@ -115,8 +118,9 @@ def solve(grid):
 
 # Todo: remove when done
 # This is a partial solution to have the algorithm solve the Sudoku quicker
-s0 = '4173698256321589479587243168254371697915864323469127582896435715732916841.4......'
-solve(parse_string_to_dict(s0))
+s0 = '4173698256321589479587243168254371697915864323469127582896435715732.1...1.4......' #
+s00 = '4173698256321589479587243168254371697915864323469127582896435715.32.1...1.4......' # Use this to show speed improvement
+# solve(parse_string_to_dict(s0))
 
 # minimum nr of clues for a unique solution is 17
 s1 = '4.....8.5.3..........7......2.....6.....8.4......1.......6.3.7.5..2.....1.4......'
@@ -134,7 +138,7 @@ s12 = '6..3.2....4.....1..........7.26............543.........8.15........4.2...
 s13 = '....3..9....2....1.5.9..............1.2.8.4.6.8.5...2..75......4.1..6..3.....4.6.'
 s14 = '45.....3....8.1....9...........5..9.2..7.....8.........1..4..........7.2...6..8..'
 
-slist = [s1, s2, s3, s4, s5, s6, s7, s8, s9, s10, s11, s12, s13, s14]
+slist = [s0, s1, s2, s3, s4, s5, s6, s7, s8, s9, s10, s11, s12, s13, s14]
 
 for s in slist:
     d = parse_string_to_dict(s)
