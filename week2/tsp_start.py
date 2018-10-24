@@ -1,3 +1,5 @@
+import copy
+
 import matplotlib.pyplot as plt
 import random
 import time
@@ -115,7 +117,7 @@ def lines_intersect(line_a, line_b):
     # 3, does line b intersect segment a
     return line_intersects_segment(line_b, line_a)
 
-def find_crossing(route, last_crossing=None):
+def find_crossing(route):
     for i in range(len(route)):
         if i == len(route) - 1:
             d = 0
@@ -128,53 +130,91 @@ def find_crossing(route, last_crossing=None):
             else:
                 k = j+1
             line_b = ((route[j].x, route[j].y), (route[k].x, route[k].y))
-            if i != j and i != j+1 and j != i+1 and (i != len(route) -1 and j != 0) and (i != 0 -1 and j != len(route)) and lines_intersect(line_a, line_b):
+            if i != j and i != j+1 and j != i+1 and (i != len(route) -1 and j != 0) and (i != 0 and j != len(route) -1) and lines_intersect(line_a, line_b):
                 print(f"Fix crossing {i}, {j}, Lines: {line_a}, {line_b}")
                 # Todo: fix this method
                 new_crossing = (i, j)
-                if last_crossing == new_crossing:
-                    draw_lines((route[i], route[d]), (route[j], route[k]))
+                # if last_crossing == new_crossing:
+
+                # draw_lines((route[i], route[d]), (route[j], route[k]), route)
                 return new_crossing
 
     return None
 
 def swap_edges(crossing, route):
-    if crossing[0] == len(route) -1:
-        i = 0
+    i, j = crossing
+
+    if i > j:
+        last = i + 1
+        first = j
     else:
-        i = crossing[0] + 1
+        last = j + 1
+        first = i
 
-    j = crossing[1]
+    slice = route[first:last]
+    slice.reverse()
 
-    var = route[i]
-    route[i] = route[j]
-    route[j] = var
+    route[first:last] = slice
 
 def line_intersects_segment(line, segment):
     return is_point_on_line(segment[0], line) or is_point_on_line(segment[1], line) or (is_point_right_of_line(line, segment[0]) ^ is_point_right_of_line(line, segment[1]))
+
+
+def find_swap_for_crossing(crossing, route):
+    test_route = copy.deepcopy(route)
+    crossing_options = itertools.permutations([crossing[0], crossing[1], crossing[0] + 1, crossing[1] + 1], 2)
+    best_swap = crossing
+    swap_edges(best_swap, test_route)
+    best_swap_value = tour_length(test_route)
+    swap_edges(best_swap, test_route)
+
+    for swap_option in crossing_options:
+
+        swap_edges(swap_option, test_route)
+
+        length = tour_length(test_route)
+        if length < best_swap_value:
+            best_swap = swap_option
+            best_swap_value = length
+            print(length)
+        else:
+            # Swap the edges back
+            swap_edges(swap_option, test_route)
+
+    return best_swap
+
 
 def two_opt(cities):
     route = nearest_neighbours(cities)
 
     crossing = find_crossing(route)
     while (crossing != None):
-        i,j = crossing
-        swap_edges(crossing, route)
-        crossing = find_crossing(route, crossing)
+        swap = find_swap_for_crossing(crossing, route)
+
+        if swap != None:
+            swap_edges(swap, route)
+        # swap_edges(crossing, route)
+        # plot_tour(route)
+        crossing = find_crossing(route)
 
     return route
 
 # for debugging purposes only
-def draw_lines(line_a, line_b):
+def draw_lines(line_a, line_b, tour):
+    points = list(tour) + [tour[0]]
+    plt.plot([p.x for p in points], [p.y for p in points], 'bo-')
+
     points = list(line_a) + [line_a[0]]
     points2 = list(line_b) + [line_b[0]]
-    plt.plot([p.x for p in points], [p.y for p in points], 'bo-')
-    plt.plot([p.x for p in points2], [p.y for p in points2], 'bo-')
+
+    plt.plot([p.x for p in points], [p.y for p in points], 'ro-')
+    plt.plot([p.x for p in points2], [p.y for p in points2], 'ro-')
+
     plt.axis('scaled') # equal increments of x and y have the same length
     plt.axis('off')
     plt.show()
 
-cities = make_cities(500)
+cities = make_cities(50)
 
 plot_tsp(nearest_neighbours, cities)
 plot_tsp(two_opt, cities)
