@@ -50,12 +50,12 @@ def display(grid):
         for c in cols:
             v = grid[r+c]
             # avoid the '123456789'
-            if v == '123456789': 
+            if v == '123456789':
                 v = '.'
             print (''.join(v), end=' ')
             if c == '3' or c == '6': print('|', end='')
         print()
-        if r == 'C' or r == 'F': 
+        if r == 'C' or r == 'F':
             print('-------------------')
     print()
 
@@ -91,7 +91,27 @@ def grid_complete(grid):
 def solve(grid):
     # backtracking search a solution (DFS)
     # your code here
-    def search(grid):
+    def search(grid, depth):
+
+        # first check which solutions are possible for each unset space before starting to solve it, repeat until no values are changed\
+        # if a space has no possibilities, the grid is incorrect
+        peer_changed = True
+        while peer_changed:
+            peer_changed = False
+            for element in grid:
+                value = grid[element]
+                if len(value) == 1:
+                    for peer in peers[element]:
+                        new_value = grid[peer].replace(value, "")
+                        if len(new_value) == 0:
+                            return None # This grid is not correct
+                        elif len(grid[peer]) != len(new_value):
+                            grid[peer] = new_value
+                            peer_changed = True
+
+        if grid_complete(grid):
+            return grid
+
         result = None
         sorted_grid = list(filter(lambda e: len(e[1]) > 1, sorted(grid.items(), key=lambda e: len(e[1]))))
 
@@ -101,26 +121,24 @@ def solve(grid):
                     new_grid = copy.deepcopy(grid)
                     new_grid[position] = option
 
-                    # Remove the move from the peers
-                    for peer in peers[position]:
-                        new_grid[peer] = new_grid[peer].replace(option, "")
+                    # print(f"Option {option} from {grid[position]}, position {position} for depth {depth} + 1")
+                    # display(new_grid)
 
-                    if grid_complete(new_grid): return new_grid
-
-                    result = search(new_grid)
+                    result = search(new_grid, depth + 1)
 
                     if result != None:
                         return result
 
         return result
 
-    result = search(grid)
+
+    result = search(grid, 0)
     display(result)
 
 # Todo: remove when done
 # This is a partial solution to have the algorithm solve the Sudoku quicker
 s0 = '4173698256321589479587243168254371697915864323469127582896435715732.1...1.4......' #
-s00 = '4173698256321589479587243168254371697915864323469127582896435715.32.1...1.4......' # Use this to show speed improvement
+s00 = '4173698256321589479..7......2.....6.....8.4......1.......6.3.7.5.32.1...1.4......' # Use this to show speed improvement
 # solve(parse_string_to_dict(s0))
 
 # minimum nr of clues for a unique solution is 17
@@ -139,7 +157,7 @@ s12 = '6..3.2....4.....1..........7.26............543.........8.15........4.2...
 s13 = '....3..9....2....1.5.9..............1.2.8.4.6.8.5...2..75......4.1..6..3.....4.6.'
 s14 = '45.....3....8.1....9...........5..9.2..7.....8.........1..4..........7.2...6..8..'
 
-slist = [s0, s1, s2, s3, s4, s5, s6, s7, s8, s9, s10, s11, s12, s13, s14]
+slist = [s00, s1, s2, s3, s4, s5, s6, s7, s8, s9, s10, s11, s12, s13, s14]
 
 for s in slist:
     d = parse_string_to_dict(s)
