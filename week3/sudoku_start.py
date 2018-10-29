@@ -91,7 +91,7 @@ def grid_complete(grid):
 def solve(grid):
     # backtracking search a solution (DFS)
     # your code here
-    def search(grid, depth):
+    def search(grid):
 
         # first check which solutions are possible for each unset space before starting to solve it, repeat until no values are changed\
         # if a space has no possibilities, the grid is incorrect
@@ -124,7 +124,7 @@ def solve(grid):
                     # print(f"Option {option} from {grid[position]}, position {position} for depth {depth} + 1")
                     # display(new_grid)
 
-                    result = search(new_grid, depth + 1)
+                    result = search(new_grid)
 
                     if result != None:
                         return result
@@ -132,7 +132,7 @@ def solve(grid):
         return result
 
 
-    result = search(grid, 0)
+    result = search(grid)
     display(result)
 
 # Todo: remove when done
@@ -157,7 +157,7 @@ s12 = '6..3.2....4.....1..........7.26............543.........8.15........4.2...
 s13 = '....3..9....2....1.5.9..............1.2.8.4.6.8.5...2..75......4.1..6..3.....4.6.'
 s14 = '45.....3....8.1....9...........5..9.2..7.....8.........1..4..........7.2...6..8..'
 
-slist = [s00, s1, s2, s3, s4, s5, s6, s7, s8, s9, s10, s11, s12, s13, s14]
+slist = [ s1, s2, s3, s4, s5, s6, s7, s8, s9, s10, s11, s12, s13, s14]
 
 for s in slist:
     d = parse_string_to_dict(s)
